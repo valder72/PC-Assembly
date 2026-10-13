@@ -5,17 +5,24 @@
 ## Functionality
 
 - **Каталог запчастин**: Перегляд списку деталей з можливістю пошуку за назвою, фільтрацією за характеристиками й виробником, а також сортуванням за ціною та популярністю (оцінкою користувачів).
+
 - **Детальна сторінка запчастини**: Перегляд її технічних характеристик, відгуків, оцінок від покупців та додавання власних відгуків.
+
 - **Порівняння**: Можливість обрати кілька деталей одного типу та порівняти їхні характеристики.
+
 - **Конструктор / Збірка ПК**: Можливість поетапно обрати сумісні комплектуючі, зберегти збірку у своєму профілі, переглянути свої збережені збірки та порівняти їх з іншими збірками, або одразу оформити на неї замовлення.
+
 - **Особистий кабінет**: Реєстрація, авторизація, збережені збірки, історія замовлень та редагування особистих даних (нікнейм, ПІБ, номер телефону, пошта, адреса проживання).
+
 - **Панель адміністратора**: Додавання, оновлення та видалення деталей у каталозі, керування статусами замовлень користувачів.
+
 
 ## Endpoints
 
 ### Auth
 
 - `POST /auth/register`
+
   - **Опис:** Реєстрація нового користувача в системі.
   - **Request method:** POST
   - **Query Parameters:** відсутні
@@ -42,6 +49,7 @@
     ```
 
 - `POST /auth/login`
+
   - **Опис:** Вхід користувача в систему та отримання токена доступу.
   - **Request method:** POST
   - **Query Parameters:** відсутні
@@ -67,6 +75,7 @@
 ### User Profile
 
 - `GET /users/me`
+
   - **Опис:** Отримання даних профілю авторизованого користувача.
   - **Request method:** GET
   - **Query Parameters:** відсутні
@@ -86,14 +95,16 @@
     ```
 
 - `PATCH /users/me`
+
   - **Опис:** Оновлення даних профілю авторизованого користувача.
   - **Request method:** PATCH
   - **Query Parameters:** відсутні
   - **Request body (JSON):**
     ```json
     {
-      "email": "user@example.com",
+      "nickname": "pc_master_99",
       "full_name": "Тарас Шевченко",
+      "email": "user@example.com",
       "phone": "+380997654321",
       "address": "м. Київ, вул. Лесі Українки, 10"
     }
@@ -115,17 +126,17 @@
 ### Parts
 
 - `GET /parts`
+
   - **Опис:** Отримання списку деталей з підтримкою пагінації, пошуку, фільтрації та сортування.
   - **Request method:** GET
   - **Query Parameters:**
     - `page`: номер сторінки (базово 1)
     - `limit`: кількість об'єктів на сторінці (базово 12)
     - `search`: пошук за назвою (наприклад, `rtx 4070`)
-    - `category`: категорія товару (`CPU`, `GPU`, `RAM` тощо)
-    - `filter`: список характеристик для фільтрації у форматі `key:value`, розділених комами (наприклад, `socket:AM5,power:750W,ram_type:DDR5,category:CPU`)
+    - `filter`: список характеристик для фільтрації у форматі `key:value`, розділених комами (наприклад, `category:CPU,socket:AM5,power:750W,ram_type:DDR5`)
     - `min_price`: мінімальна ціна
     - `max_price`: максимальна ціна
-    - `sort`: спосіб сортування (`price_asc`, `price_desc`, `rating_desc`, `title_asc`)
+    - `sort`: спосіб сортування (по рейтингу, по ціні)
   - **Request body:** порожній
   - **Response Status:** `200 OK`
   - **Response Body (JSON):**
@@ -140,13 +151,10 @@
           "id": 101,
           "title": "AMD Ryzen 7 7800X3D",
           "category": "CPU",
-          "manufacturer": {
-            "id": 1,
-            "name": "AMD"
-          },
           "price": 17800.00,
           "rating": 4.9,
           "specs": {
+            "manufacturer_name": "AMD",
             "socket": "AM5",
             "cores": 8,
             "threads": 16,
@@ -158,6 +166,7 @@
     ```
 
 - `GET /parts/{id}`
+
   - **Опис:** Отримання повної інформації про конкретну деталь.
   - **Request method:** GET
   - **Query Parameters:** відсутні
@@ -169,14 +178,11 @@
       "id": 101,
       "title": "Intel Core i7-13700K",
       "category": "CPU",
-      "manufacturer": {
-        "id": 2,
-        "name": "Intel"
-      },
       "price": 16500.00,
       "rating": 4.9,
       "description": "Потужний процесор для ігрових систем та робочих станцій.",
       "specs": {
+        "manufacturer_name": "Intel",
         "socket": "LGA1700",
         "cores": 16,
         "threads": 24,
@@ -189,6 +195,7 @@
     ```
 
 - `POST /parts`
+
   - **Опис:** Додавання нової запчастини до каталогу (тільки для роли Admin).
   - **Request method:** POST
   - **Query Parameters:** відсутні
@@ -197,10 +204,10 @@
     {
       "title": "NVIDIA GeForce RTX 4080 Super",
       "category": "GPU",
-      "manufacturer_id": 3,
       "price": 42000.00,
       "description": "Флагманська відеокарта для 4K геймінгу.",
       "specs": {
+        "manufacturer_name": "NVIDIA",
         "vram_gb": 16,
         "interface": "PCIe 4.0",
         "tdp_watts": 320
@@ -214,13 +221,10 @@
       "id": 105,
       "title": "NVIDIA GeForce RTX 4080 Super",
       "category": "GPU",
-      "manufacturer": {
-        "id": 3,
-        "name": "NVIDIA"
-      },
       "price": 42000.00,
       "rating": 0.0,
       "specs": {
+        "manufacturer_name": "NVIDIA",
         "vram_gb": 16,
         "interface": "PCIe 4.0",
         "tdp_watts": 320
@@ -229,6 +233,7 @@
     ```
 
 - `PATCH /parts/{id}`
+
   - **Опис:** Оновлення даних запчастини (тільки для роли Admin).
   - **Request method:** PATCH
   - **Query Parameters:** відсутні
@@ -249,6 +254,7 @@
     ```
 
 - `DELETE /parts/{id}`
+
   - **Опис:** Видалення запчастини з каталогу (тільки для роли Admin).
   - **Request method:** DELETE
   - **Query Parameters:** відсутні
@@ -256,9 +262,51 @@
   - **Response Status:** `204 No Content`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`
   - **Response Body:** порожній
 
+- `GET /parts/compare`
+
+  - **Опис:** Отримання характеристик кількох деталей для їхнього порівняння.
+  - **Request method:** GET
+  - **Query Parameters:**
+    - `ids`: список ID товарів через кому (наприклад, `201,202`)
+  - **Request body:** порожній
+  - **Response Status:** `200 OK`, `400 Bad Request` (якщо передано товари з різних категорій)
+  - **Response Body (JSON):**
+    ```json
+    {
+      "category": "RAM",
+      "compared_items": [
+        {
+          "id": 201,
+          "title": "Kingston FURY DDR5 32GB (2x16GB)",
+          "price": 5400.00,
+          "specs": {
+            "manufacturer_name": "Kingston",
+            "capacity_gb": 32,
+            "memory_type": "DDR5",
+            "frequency_mhz": 6000,
+            "cas_latency": "CL36"
+          }
+        },
+        {
+          "id": 202,
+          "title": "Corsair Vengeance DDR5 32GB (2x16GB)",
+          "price": 5800.00,
+          "specs": {
+            "manufacturer_name": "Corsair",
+            "capacity_gb": 32,
+            "memory_type": "DDR5",
+            "frequency_mhz": 6400,
+            "cas_latency": "CL32"
+          }
+        }
+      ]
+    }
+    ```
+    
 ### Reviews
 
 - `GET /parts/{id}/reviews`
+
   - **Опис:** Отримання переліку відгуків та оцінок для конкретної деталі.
   - **Request method:** GET
   - **Query Parameters:** `page`, `limit`
@@ -278,6 +326,7 @@
     ```
 
 - `POST /parts/{id}/reviews`
+
   - **Опис:** Додавання нового відгуку та оцінки до товару.
   - **Request method:** POST
   - **Query Parameters:** відсутні
@@ -293,7 +342,6 @@
     ```json
     {
       "id": 1,
-      "part_id": 101,
       "author": "pc_master_99",
       "rating": 5,
       "comment": "Чудовий процесор, усе працює ідеально!",
@@ -301,51 +349,10 @@
     }
     ```
 
-### Comparisons
-
-- `GET /comparisons`
-  - **Опис:** Отримання списку обраних товарів одного типу для порівняння їхніх характеристик.
-  - **Request method:** GET
-  - **Query Parameters:**
-    - `ids`: список ID товарів через кому (наприклад, `201,202`)
-  - **Request body:** порожній
-  - **Response Status:** `200 OK`, `400 Bad Request` (якщо передано товари з різних категорій)
-  - **Response Body (JSON):**
-    ```json
-    {
-      "category": "RAM",
-      "compared_items": [
-        {
-          "id": 201,
-          "title": "Kingston FURY DDR5 32GB (2x16GB)",
-          "manufacturer": { "id": 4, "name": "Kingston" },
-          "price": 5400.00,
-          "specs": {
-            "capacity_gb": 32,
-            "memory_type": "DDR5",
-            "frequency_mhz": 6000,
-            "cas_latency": "CL36"
-          }
-        },
-        {
-          "id": 202,
-          "title": "Corsair Vengeance DDR5 32GB (2x16GB)",
-          "manufacturer": { "id": 5, "name": "Corsair" },
-          "price": 5800.00,
-          "specs": {
-            "capacity_gb": 32,
-            "memory_type": "DDR5",
-            "frequency_mhz": 6400,
-            "cas_latency": "CL32"
-          }
-        }
-      ]
-    }
-    ```
-
 ### Builds
 
 - `GET /builds`
+
   - **Опис:** Отримання списку збережених збірок ПК (з підтримкою фільтрації для перегляду власних збірок або збірок інших користувачів).
   - **Request method:** GET
   - **Query Parameters:**
@@ -367,6 +374,7 @@
     ```
 
 - `POST /builds`
+
   - **Опис:** Збереження нової конфігурації ПК (створеної у конструкторі).
   - **Request method:** POST
   - **Query Parameters:** відсутні
@@ -394,6 +402,7 @@
     ```
 
 - `GET /builds/{id}`
+
   - **Опис:** Отримання детальної інформації про збережену збірку.
   - **Request method:** GET
   - **Query Parameters:** відсутні
@@ -419,13 +428,14 @@
           "title": "Kingston FURY DDR5 32GB",
           "category": "RAM",
           "quantity": 2,
-          "unit_price": 5400.00
+          "price": 5400.00
         }
       ]
     }
     ```
 
 - `DELETE /builds/{id}`
+
   - **Опис:** Видалення збереженої збірки користувача.
   - **Request method:** DELETE
   - **Query Parameters:** відсутні
@@ -434,6 +444,7 @@
   - **Response Body:** порожній
 
 - `GET /builds/compare`
+
   - **Опис:** Порівняння кількох збережених збірок ПК між собою.
   - **Request method:** GET
   - **Query Parameters:**
@@ -461,6 +472,7 @@
 ### Cart
 
 - `GET /cart`
+
   - **Опис:** Отримання вмісту кошика поточного користувача.
   - **Request method:** GET
   - **Query Parameters:** відсутні
@@ -483,6 +495,7 @@
     ```
 
 - `POST /cart/items`
+
   - **Опис:** Додавання товару до кошика.
   - **Request method:** POST
   - **Query Parameters:** відсутні
@@ -506,6 +519,7 @@
     ```
 
 - `DELETE /cart/items/{item_id}`
+
   - **Опис:** Видалення конкретного товару з кошика.
   - **Request method:** DELETE
   - **Query Parameters:** відсутні
@@ -514,6 +528,7 @@
   - **Response Body:** порожній
 
 - `DELETE /cart`
+
   - **Опис:** Повне очищення кошика поточного користувача.
   - **Request method:** DELETE
   - **Query Parameters:** відсутні
@@ -524,6 +539,7 @@
 ### Orders
 
 - `GET /orders`
+
   - **Опис:** Отримання історії замовлень користувача (або всіх замовлень для Admin).
   - **Request method:** GET
   - **Query Parameters:** `page`, `limit`, `status`
@@ -542,6 +558,7 @@
     ```
 
 - `GET /orders/{id}`
+
   - **Опис:** Отримання детальної інформації про конкретне замовлення.
   - **Request method:** GET
   - **Query Parameters:** відсутні
@@ -566,16 +583,12 @@
     ```
 
 - `POST /orders`
-  - **Опис:** Оформлення замовлення із товарів кошика або напряму з конкретної збереженої збірки.
+
+  - **Опис:** Оформлення замовлення на основі товарів, що знаходяться у кошику авторизованого користувача. (Після успішного створення замовлення, кошик автоматично очищується).
   - **Request method:** POST
   - **Query Parameters:** відсутні
-  - **Request body (JSON):**
-    ```json
-    {
-      "build_id": null
-    }
-    ```
-  - **Response Status:** `201 Created`, `400 Bad Request`, `401 Unauthorized`
+  - **Request body:** порожній
+  - **Response Status:** `201 Created`, `400 Bad Request` (якщо кошик порожній), `401 Unauthorized`
   - **Response Body (JSON):**
     ```json
     {
@@ -587,6 +600,7 @@
     ```
 
 - `PATCH /orders/{id}`
+
   - **Опис:** Оновлення статусу замовлення (доступно лише для користувачів із роллю Admin).
   - **Request method:** PATCH
   - **Query Parameters:** відсутні
@@ -604,10 +618,15 @@
       "status": "shipped"
     }
     ```
+## DB sheme
+<img width="729" height="972" alt="DB drawio" src="https://github.com/user-attachments/assets/a5f6041f-2f2d-4802-b08a-0a449b4c3ba5" />
 
 ## TODO
 
-- **Механізм перевірки сумісності деталей у конструкторі:** треба придумати де збергігажться сумсінсть у БД чи буде обчстлюатися на бекенді
-- **Авторизація та автентифікація:** як саме перевіряти чи користувач зареєстрований
-- **Збереження цін у БД:** де карще зберігати ціни ( у БД одноразово чи використ API для актуальних цін)
-- **Візуалізація БД:** зробити схему БД
+- Треба придумати де зберігатися сумісність у БД чи вона буде обчислюватися окремою функцією
+
+- Подумати як саме перевіряти чи користувач зареєстрований
+
+- Подумати де карще зберігати ціни ( у БД одноразово чи використ API для актуальних цін)
+
+- Подумати як зберігати різні категорії товарів (для кожної категорії або якось інакше) 

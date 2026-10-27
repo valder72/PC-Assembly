@@ -17,6 +17,66 @@
 - **Панель адміністратора**: Додавання, оновлення та видалення деталей у каталозі, керування статусами замовлень користувачів.
 
 
+## Як запустити проєкт
+
+### 1. Клонування репозиторію
+```bash
+git clone https://github.com/valder72/PC-Assembly.git
+cd PC-Assembly
+```
+
+### 2. Налаштування віртуального середовища
+```bash
+# Створення venv
+python3 -m venv .venv
+
+# Активація venv (Linux/macOS)
+source .venv/bin/activate
+
+# Активація venv (Windows PowerShell)
+# .venv\Scripts\Activate.ps1
+```
+
+### 3. Встановлення залежностей
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Налаштування змінних оточення
+Створіть файл `.env` на основі `.env.example`:
+```bash
+cp .env.example .env
+```
+
+### 5. Застосування міграцій бази даних
+```bash
+python manage.py migrate
+```
+
+### 6. Створення адміністратора (опціонально)
+```bash
+python manage.py createsuperuser
+```
+
+### 7. Запуск сервера розробки
+```bash
+python manage.py runserver
+```
+Сервер буде доступний за адресою: `http://127.0.0.1:8000/`.  
+Панель адміністратора: `http://127.0.0.1:8000/admin/`.
+
+---
+
+### 8. Тестування API (Postman Collection)
+У проєкт додано готову Postman-колекцію v2.1: `postman/pc_assembly.postman_collection.json`.
+
+Запуск автоматичних тестів через Postman CLI:
+```bash
+postman collection run postman/pc_assembly.postman_collection.json
+```
+Колекція автоматично тестує всі 27 запитів (CRUD, фільтрацію, валідацію `400`, `404` та перевірку конфлікту бізнес-логіки `409 Conflict`).
+
+
 ## Endpoints
 
 ### Auth
@@ -120,6 +180,113 @@
       "phone": "+380997654321",
       "address": "м. Київ, вул. Лесі Українки, 10",
       "role": "user"
+    }
+    ```
+
+### Categories
+
+- `GET /categories/`
+  - **Опис:** Отримання списку всіх категорій комплектуючих.
+  - **Request method:** GET
+  - **Response Status:** `200 OK`
+  - **Response Body (JSON):**
+    ```json
+    [
+      {
+        "id": 1,
+        "name": "Processors (CPU)",
+        "description": "Центральні процесори для ПК"
+      }
+    ]
+    ```
+
+- `POST /categories/`
+  - **Опис:** Створення нової категорії.
+  - **Request method:** POST
+  - **Request body (JSON):**
+    ```json
+    {
+      "name": "Video Cards (GPU)",
+      "description": "Графічні карти"
+    }
+    ```
+  - **Response Status:** `201 Created`, `400 Bad Request`
+
+- `GET /categories/{id}/`
+  - **Опис:** Отримання інформації про конкретну категорію.
+  - **Request method:** GET
+  - **Response Status:** `200 OK`, `404 Not Found`
+
+- `PUT /categories/{id}/`
+  - **Опис:** Повне оновлення категорії.
+  - **Request method:** PUT
+  - **Request body (JSON):**
+    ```json
+    {
+      "name": "GPU",
+      "description": "Оновлений опис відеокарт"
+    }
+    ```
+  - **Response Status:** `200 OK`, `400 Bad Request`, `404 Not Found`
+
+- `DELETE /categories/{id}/`
+  - **Опис:** Видалення категорії. Заборонено видаляти категорію, якщо до неї прив'язані деталі (захист цілісності).
+  - **Request method:** DELETE
+  - **Response Status:** `204 No Content`, `404 Not Found`, `409 Conflict`
+  - **Response Body (при 409 Conflict):**
+    ```json
+    {
+      "error": "Cannot delete category 'Processors (CPU)' because it has 5 related part(s)."
+    }
+    ```
+
+### Manufacturers
+
+- `GET /manufacturers/`
+  - **Опис:** Отримання списку всіх виробників.
+  - **Request method:** GET
+  - **Response Status:** `200 OK`
+  - **Response Body (JSON):**
+    ```json
+    [
+      {
+        "id": 1,
+        "name": "AMD",
+        "country": "USA"
+      }
+    ]
+    ```
+
+- `POST /manufacturers/`
+  - **Опис:** Додавання нового виробника.
+  - **Request method:** POST
+  - **Request body (JSON):**
+    ```json
+    {
+      "name": "NVIDIA",
+      "country": "USA"
+    }
+    ```
+  - **Response Status:** `201 Created`, `400 Bad Request`
+
+- `GET /manufacturers/{id}/`
+  - **Опис:** Отримання інформації про виробника за ID.
+  - **Request method:** GET
+  - **Response Status:** `200 OK`, `404 Not Found`
+
+- `PUT /manufacturers/{id}/`
+  - **Опис:** Повне оновлення даних виробника.
+  - **Request method:** PUT
+  - **Response Status:** `200 OK`, `400 Bad Request`, `404 Not Found`
+
+- `DELETE /manufacturers/{id}/`
+  - **Опис:** Видалення виробника. Заборонено видаляти виробника, якщо за ним закріплені деталі.
+  - **Request method:** DELETE
+  - **Response Status:** `204 No Content`, `404 Not Found`, `409 Conflict`
+  - **Response Body (при 409 Conflict):**
+    ```json
+    {
+      "error": "Cannot delete manufacturer 'AMD' because it has 3 related part(s)."
     }
     ```
 
@@ -765,4 +932,5 @@
 
 - Подумати де карще зберігати ціни ( у БД одноразово чи використ API для актуальних цін)
 
+- Подумати як зберігати фото 
 

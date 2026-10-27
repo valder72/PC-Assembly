@@ -621,6 +621,140 @@
 ## DB sheme
 <img width="729" height="972" alt="DB drawio" src="https://github.com/user-attachments/assets/a5f6041f-2f2d-4802-b08a-0a449b4c3ba5" />
 
+### Як зберігати товари у БД (Архітектурне рішення)
+
+Оскільки комп'ютерні комплектуючі різних типів (процесори, відеокарти, оперативна пам'ять, материнські плати тощо) мають як спільні базові поля, так і зовсім різні технічні характеристики, обрано комбінований підхід із **єдиною таблицею товарів (`Part`), окремими таблицями для категорій (`Category`) і виробників (`Manufacturer`), та `JSONField` для специфічних характеристик (`specs`)**:
+
+1. **Модель `Category`**
+   - Зберігає перелік категорій комплектуючих (`CPU`, `GPU`, `RAM`, `Motherboard`, `PSU`, `Storage`, `Case` тощо).
+   - **Поля:** `id`, `name` (унікальна назва), `slug`, `description`.
+   - **Бізнес-обмеження:** не можна видалити категорію (`on_delete=PROTECT` / статус `409 Conflict`), якщо в базі даних є товари, прив'язані до неї.
+
+2. **Модель `Manufacturer`**
+   - Зберігає інформацію про брендів-виробників (`AMD`, `Intel`, `NVIDIA`, `Kingston`, `ASUS` тощо).
+   - **Поля:** `id`, `name` (унікальна назва), `country`, `website`, `description`.
+   - **Бізнес-обмеження:** не можна видалити виробника (`on_delete=PROTECT` / статус `409 Conflict`), якщо на сайті є закріплені за ним запчастини.
+
+3. **Модель `Part`**
+   - Єдина таблиця для всіх комплектуючих, що містить спільні атрибути, за якими найчастіше виконуються пошук, сортування та фільтрація каталогу.
+   - **Поля:**
+     - `id` — унікальний ідентифікатор;
+     - `title` (`CharField`) — назва моделі товару;
+     - `category` (`ForeignKey` -> `Category`) — посилання на категорію;
+     - `manufacturer` (`ForeignKey` -> `Manufacturer`) — посилання на виробника;
+     - `price` (`DecimalField`) — актуальна ціна товару;
+     - `stock` (`PositiveIntegerField`) — кількість на складі;
+     - `rating` (`DecimalField` / обчислюване поле) — середній рейтинг на основі відгуків;
+     - `description` (`TextField`) — текстовий опис деталі;
+     - `specs` (`JSONField`) — словник специфічних характеристик залежно від категорії;
+     - `created_at`, `updated_at` — часові мітки.
+
+4. **Збереження та валідація `specs` (`JSONField`)**
+   - У полі `specs` зберігаються технічні характеристики, специфічні для кожної категорії комплектуючих. Це дозволяє легко перевіряти сумісність деталей при збірці ПК та організувати фільтрацію:
+     
+     - **CPU (Процесор):**
+       ```json
+       {
+         "socket": "AM5",
+         "cores": 8,
+         "threads": 16,
+         "base_clock_ghz": 4.2,
+         "max_boost_ghz": 5.0,
+         "tdp_watts": 120,
+         "integrated_graphics": "AMD Radeon Graphics"
+       }
+       ```
+
+     - **Motherboard (Материнська плата):**
+       ```json
+       {
+         "socket": "AM5",
+         "chipset": "B650",
+         "form_factor": "ATX",
+         "memory_type": "DDR5",
+         "memory_slots": 4,
+         "max_memory_gb": 192,
+         "pcie_version": "PCIe 4.0",
+         "m2_slots": 3,
+         "sata_ports": 4,
+         "has_wifi": true
+       }
+       ```
+
+     - **GPU (Відеокарта):**
+       ```json
+       {
+         "chipset_model": "RTX 4080 Super",
+         "vram_gb": 16,
+         "memory_type": "GDDR6X",
+         "interface": "PCIe 4.0 x16",
+         "tdp_watts": 320,
+         "recommended_psu_watts": 750,
+         "length_mm": 310
+       }
+       ```
+
+     - **RAM (Оперативна пам'ять):**
+       ```json
+       {
+         "capacity_gb": 32,
+         "modules_count": 2,
+         "memory_type": "DDR5",
+         "frequency_mhz": 6000,
+         "cas_latency": "CL36",
+         "voltage": 1.35
+       }
+       ```
+
+     - **Storage (SSD / HDD Накопичувач):**
+       ```json
+       {
+         "type": "NVMe M.2 SSD",
+         "form_factor": "M.2 2280",
+         "capacity_gb": 1000,
+         "interface": "PCIe 4.0 x4",
+         "read_speed_mbps": 7400,
+         "write_speed_mbps": 6500,
+         "tbw": 600
+       }
+       ```
+
+     - **PSU (Блок живлення):**
+       ```json
+       {
+         "power_watts": 850,
+         "form_factor": "ATX",
+         "efficiency_rating": "80 PLUS Gold",
+         "modularity": "Fully Modular",
+         "pcie_connectors": 4
+       }
+       ```
+
+     - **Case (Корпус):**
+       ```json
+       {
+         "case_type": "Mid-Tower",
+         "supported_motherboards": ["ATX", "Micro-ATX", "Mini-ITX"],
+         "max_gpu_length_mm": 400,
+         "max_cooler_height_mm": 170,
+         "included_fans": 3
+       }
+       ```
+
+     - **Cooler (Кулер / Система охолодження):**
+       ```json
+       {
+         "cooler_type": "Air Cooler",
+         "supported_sockets": ["AM4", "AM5", "LGA1700", "LGA1851"],
+         "max_tdp_watts": 250,
+         "height_mm": 158,
+         "fan_size_mm": 120
+       }
+       ```
+
+   - Валідація структури `specs` виконується на рівні **DRF Serializer** (перевірка обов'язкових ключів та типів значень відповідно до обраної `Category`).
+
+
 ## TODO
 
 - Треба придумати де зберігатися сумісність у БД чи вона буде обчислюватися окремою функцією
@@ -631,5 +765,4 @@
 
 - Подумати де карще зберігати ціни ( у БД одноразово чи використ API для актуальних цін)
 
-- Подумати як зберігати різні категорії товарів (для кожної категорії або якось інакше)
 

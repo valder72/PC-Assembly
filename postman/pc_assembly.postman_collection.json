@@ -1,0 +1,1037 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+		"name": "PC Assembly API",
+		"description": "Повна Postman-колекція з динамічними змінними для тестування CRUD, бізнес-логіки (409) та валідації.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "manufacturer_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "part_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Створення ресурсів (POST 201)",
+			"item": [
+				{
+					"name": "Create Category (201 Created)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var data = pm.response.json();",
+									"if (data.id) {",
+									"    pm.collectionVariables.set('category_id', data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Processors (CPU)\",\n    \"description\": \"Центральні процесори для ПК\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Manufacturer (201 Created)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var data = pm.response.json();",
+									"if (data.id) {",
+									"    pm.collectionVariables.set('manufacturer_id', data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"AMD\",\n    \"country\": \"USA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/manufacturers/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturers",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Part (201 Created)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201 Created', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var data = pm.response.json();",
+									"if (data.id) {",
+									"    pm.collectionVariables.set('part_id', data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"AMD Ryzen 7 7800X3D\",\n    \"category\": {{category_id}},\n    \"manufacturer\": {{manufacturer_id}},\n    \"price\": \"17800.00\",\n    \"rating\": \"4.90\",\n    \"specs\": {\n        \"socket\": \"AM5\",\n        \"cores\": 8,\n        \"threads\": 16,\n        \"tdp_watts\": 120\n    },\n    \"description\": \"Найкращий ігровий процесор з технологією 3D V-Cache.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/parts/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Отримання та пошук (GET 200)",
+			"item": [
+				{
+					"name": "Get All Categories (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category By ID (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/{{category_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"{{category_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Manufacturers (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/manufacturers/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturers",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Manufacturer By ID (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/manufacturers/{{manufacturer_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturers",
+								"{{manufacturer_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Parts (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/parts/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Parts By Category (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/parts/?category={{category_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								""
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "{{category_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Parts By Title (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/parts/?search=Ryzen",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Ryzen"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Part By ID (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/parts/{{part_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								"{{part_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Оновлення даних (PUT / PATCH 200)",
+			"item": [
+				{
+					"name": "Update Category - PUT (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Processors (CPU)\",\n    \"description\": \"Оновлений опис процесорів для ПК\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/{{category_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"{{category_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Manufacturer - PUT (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"AMD Inc.\",\n    \"country\": \"United States\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/manufacturers/{{manufacturer_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturers",
+								"{{manufacturer_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Part - PUT (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"AMD Ryzen 7 7800X3D (Box)\",\n    \"category\": {{category_id}},\n    \"manufacturer\": {{manufacturer_id}},\n    \"price\": \"18200.00\",\n    \"rating\": \"4.95\",\n    \"specs\": {\n        \"socket\": \"AM5\",\n        \"cores\": 8,\n        \"threads\": 16,\n        \"tdp_watts\": 120\n    },\n    \"description\": \"Повна комплектація процесора у фірмовій коробці.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/parts/{{part_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								"{{part_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update Part - PATCH (200 OK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200 OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": \"17500.00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/parts/{{part_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								"{{part_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Валідація та помилки (400 Bad Request, 404 Not Found)",
+			"item": [
+				{
+					"name": "Create Category - Empty Name (400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Manufacturer - Empty Name (400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/manufacturers/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturers",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Part - Negative Price (400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Intel Core i9\",\n    \"category\": {{category_id}},\n    \"manufacturer\": {{manufacturer_id}},\n    \"price\": \"-1500.00\",\n    \"specs\": {\n        \"socket\": \"LGA1700\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/parts/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Part - Invalid Specs (400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 400 Bad Request', function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"GeForce RTX 4080\",\n    \"category\": {{category_id}},\n    \"manufacturer\": {{manufacturer_id}},\n    \"price\": \"42000.00\",\n    \"specs\": \"not_a_json_object\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/parts/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category - Not Found (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/9999/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"9999",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Manufacturer - Not Found (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/manufacturers/9999/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturers",
+								"9999",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Part - Not Found (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 404 Not Found', function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/parts/9999/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								"9999",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Бізнес-логіка: Конфлікт видалення (409 Conflict)",
+			"item": [
+				{
+					"name": "Delete Category - Conflict With Parts (409)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/{{category_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"{{category_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Manufacturer - Conflict With Parts (409)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 409 Conflict', function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/manufacturers/{{manufacturer_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturers",
+								"{{manufacturer_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Очищення та успішне видалення (204 No Content)",
+			"item": [
+				{
+					"name": "Delete Part (204 No Content)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/parts/{{part_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"parts",
+								"{{part_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category - Success (204 No Content)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/{{category_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"{{category_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Manufacturer - Success (204 No Content)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 204 No Content', function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/manufacturers/{{manufacturer_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"manufacturers",
+								"{{manufacturer_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

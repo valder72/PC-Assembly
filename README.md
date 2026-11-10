@@ -79,109 +79,143 @@ postman collection run postman/pc_assembly.postman_collection.json
 
 ## Endpoints
 
-### Auth
+### Authentication & Authorization (JWT)
 
-- `POST /auth/register`
+- `POST /user/register/`
 
-  - **Опис:** Реєстрація нового користувача в системі.
+  - **Опис:** Реєстрація нового користувача в системі. Пароль зберігається в базі даних виключно у захешованому вигляді.
   - **Request method:** POST
+  - **Headers:** `Content-Type: application/json`
   - **Query Parameters:** відсутні
   - **Request body (JSON):**
     ```json
     {
-      "nickname": "pc_master_99",
-      "email": "user@example.com",
-      "password": "strongPassword123",
-      "full_name": "Тарас Шевченко",
-      "phone": "+380991234567",
-      "address": "м. Київ, вул. Хрещатик, 1"
+      "username": "ivan_master",
+      "first_name": "Іван",
+      "last_name": "Петренко",
+      "email": "ivan@example.com",
+      "password": "SecurePassword123",
+      "password_confirmation": "SecurePassword123"
     }
     ```
+  - **Поля:**
+    - `username` (обов'язкове, макс. 150 символів)
+    - `first_name` (необов'язкове, макс. 150 символів, дозволено порожній рядок)
+    - `last_name` (необов'язкове, макс. 150 символів, дозволено порожній рядок)
+    - `email` (обов'язкове, формат `name@example.com`, унікальне, макс. 254 символи)
+    - `password` (обов'язкове, мін. 8 символів, обов'язкова наявність літер та цифр)
+    - `password_confirmation` (обов'язкове, має точно збігатися з `password`)
   - **Response Status:** `201 Created`, `400 Bad Request`
-  - **Response Body (JSON):**
+  - **Response Body (201 Created):**
     ```json
     {
-      "id": 12,
-      "nickname": "pc_master_99",
-      "email": "user@example.com",
-      "role": "user"
+      "id": 1,
+      "username": "ivan_master",
+      "email": "ivan@example.com",
+      "first_name": "Іван",
+      "last_name": "Петренко",
+      "is_staff": false
+    }
+    ```
+  - **Response Body (400 Bad Request - невалідні дані):**
+    ```json
+    {
+      "password_confirmation": [
+        "Password does not match"
+      ],
+      "email": [
+        "Користувач із такою електронною поштою вже існує."
+      ]
     }
     ```
 
-- `POST /auth/login`
+- `POST /user/token/`
 
-  - **Опис:** Вхід користувача в систему та отримання токена доступу.
+  - **Опис:** Вхід у систему (Login). Перевіряє облікові дані та повертає пару токенів JWT (`access` та `refresh`).
   - **Request method:** POST
+  - **Headers:** `Content-Type: application/json`
   - **Query Parameters:** відсутні
   - **Request body (JSON):**
     ```json
     {
-      "email": "user@example.com",
-      "password": "strongPassword123"
+      "username": "ivan_master",
+      "password": "SecurePassword123"
     }
     ```
   - **Response Status:** `200 OK`, `401 Unauthorized`
-  - **Response Body (JSON):**
+  - **Response Body (200 OK):**
     ```json
     {
-      "user": {
-        "id": 12,
-        "nickname": "pc_master_99",
-        "role": "user"
-      }
+      "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNz...",
+      "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc..."
+    }
+    ```
+  - **Response Body (401 Unauthorized):**
+    ```json
+    {
+      "detail": "No active account found with the given credentials"
     }
     ```
 
-### User Profile
+- `POST /user/token/refresh/`
 
-- `GET /users/me`
+  - **Опис:** Оновлення `access`-токена за допомогою чинного `refresh`-токена без необхідності повторного введення логіна й пароля.
+  - **Request method:** POST
+  - **Headers:** `Content-Type: application/json`
+  - **Query Parameters:** відсутні
+  - **Request body (JSON):**
+    ```json
+    {
+      "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc..."
+    }
+    ```
+  - **Response Status:** `200 OK`, `401 Unauthorized`
+  - **Response Body (200 OK):**
+    ```json
+    {
+      "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNz..."
+    }
+    ```
 
-  - **Опис:** Отримання даних профілю авторизованого користувача.
+- `GET /user/me/`
+
+  - **Опис:** Отримання публічних даних профілю поточного авторизованого користувача.
   - **Request method:** GET
+  - **Headers:** 
+    - `Authorization: Bearer <access_token>`
   - **Query Parameters:** відсутні
   - **Request body:** порожній
   - **Response Status:** `200 OK`, `401 Unauthorized`
-  - **Response Body (JSON):**
+  - **Response Body (200 OK):**
     ```json
     {
-      "id": 12,
-      "nickname": "pc_master_99",
-      "full_name": "Тарас Шевченко",
-      "email": "user@example.com",
-      "phone": "+380991234567",
-      "address": "м. Київ, вул. Хрещатик, 1",
-      "role": "user"
+      "id": 1,
+      "username": "ivan_master",
+      "email": "ivan@example.com",
+      "first_name": "Іван",
+      "last_name": "Петренко",
+      "is_staff": false
+    }
+    ```
+  - **Response Body (401 Unauthorized):**
+    ```json
+    {
+      "detail": "Given token not valid for any token type"
     }
     ```
 
-- `PATCH /users/me`
+### Права доступу до каталогу (Permissions)
 
-  - **Опис:** Оновлення даних профілю авторизованого користувача.
-  - **Request method:** PATCH
-  - **Query Parameters:** відсутні
-  - **Request body (JSON):**
-    ```json
-    {
-      "nickname": "pc_master_99",
-      "full_name": "Тарас Шевченко",
-      "email": "user@example.com",
-      "phone": "+380997654321",
-      "address": "м. Київ, вул. Лесі Українки, 10"
-    }
-    ```
-  - **Response Status:** `200 OK`, `400 Bad Request`, `401 Unauthorized`
-  - **Response Body (JSON):**
-    ```json
-    {
-      "id": 12,
-      "nickname": "pc_master_99",
-      "full_name": "Тарас Шевченко",
-      "email": "user@example.com",
-      "phone": "+380997654321",
-      "address": "м. Київ, вул. Лесі Українки, 10",
-      "role": "user"
-    }
-    ```
+Для ресурсів каталогу (`Categories`, `Manufacturers`, `Parts`) діє рольова модель `IsAdminOrReadOnly`:
+- **Перегляд (GET)**: відкритий для всіх користувачів (навіть неавторизованих).
+- **Створення, оновлення, видалення (POST, PUT, PATCH, DELETE)**: доступно **тільки адміністраторам** (`is_staff: true`).
+- Для неавторизованих запитів на зміну повертається `401 Unauthorized`.
+- Для запитів від звичайних авторизованих користувачів (не адмінів) повертається `403 Forbidden`:
+  ```json
+  {
+    "detail": "You do not have permission to perform this action."
+  }
+  ```
 
 ### Categories
 
@@ -201,8 +235,9 @@ postman collection run postman/pc_assembly.postman_collection.json
     ```
 
 - `POST /categories/`
-  - **Опис:** Створення нової категорії.
+  - **Опис:** Створення нової категорії (доступно лише для адміністраторів).
   - **Request method:** POST
+  - **Headers:** `Authorization: Bearer <access_token>`, `Content-Type: application/json`
   - **Request body (JSON):**
     ```json
     {
@@ -210,16 +245,17 @@ postman collection run postman/pc_assembly.postman_collection.json
       "description": "Графічні карти"
     }
     ```
-  - **Response Status:** `201 Created`, `400 Bad Request`
+  - **Response Status:** `201 Created`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`
 
 - `GET /categories/{id}/`
-  - **Опис:** Отримання інформації про конкретну категорію.
+  - **Опис:** Отримання інформації про конкретну категорію (доступно всім).
   - **Request method:** GET
   - **Response Status:** `200 OK`, `404 Not Found`
 
 - `PUT /categories/{id}/`
-  - **Опис:** Повне оновлення категорії.
+  - **Опис:** Повне оновлення категорії (доступно лише для адміністраторів).
   - **Request method:** PUT
+  - **Headers:** `Authorization: Bearer <access_token>`, `Content-Type: application/json`
   - **Request body (JSON):**
     ```json
     {
@@ -227,12 +263,13 @@ postman collection run postman/pc_assembly.postman_collection.json
       "description": "Оновлений опис відеокарт"
     }
     ```
-  - **Response Status:** `200 OK`, `400 Bad Request`, `404 Not Found`
+  - **Response Status:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`
 
 - `DELETE /categories/{id}/`
-  - **Опис:** Видалення категорії. Заборонено видаляти категорію, якщо до неї прив'язані деталі (захист цілісності).
+  - **Опис:** Видалення категорії (доступно лише для адміністраторів). Заборонено видаляти категорію, якщо до неї прив'язані деталі (захист цілісності).
   - **Request method:** DELETE
-  - **Response Status:** `204 No Content`, `404 Not Found`, `409 Conflict`
+  - **Headers:** `Authorization: Bearer <access_token>`
+  - **Response Status:** `204 No Content`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `409 Conflict`
   - **Response Body (при 409 Conflict):**
     ```json
     {
@@ -258,8 +295,9 @@ postman collection run postman/pc_assembly.postman_collection.json
     ```
 
 - `POST /manufacturers/`
-  - **Опис:** Додавання нового виробника.
+  - **Опис:** Додавання нового виробника (доступно лише для адміністраторів).
   - **Request method:** POST
+  - **Headers:** `Authorization: Bearer <access_token>`, `Content-Type: application/json`
   - **Request body (JSON):**
     ```json
     {
@@ -267,22 +305,24 @@ postman collection run postman/pc_assembly.postman_collection.json
       "country": "USA"
     }
     ```
-  - **Response Status:** `201 Created`, `400 Bad Request`
+  - **Response Status:** `201 Created`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`
 
 - `GET /manufacturers/{id}/`
-  - **Опис:** Отримання інформації про виробника за ID.
+  - **Опис:** Отримання інформації про виробника за ID (доступно всім).
   - **Request method:** GET
   - **Response Status:** `200 OK`, `404 Not Found`
 
 - `PUT /manufacturers/{id}/`
-  - **Опис:** Повне оновлення даних виробника.
+  - **Опис:** Повне оновлення даних виробника (доступно лише для адміністраторів).
   - **Request method:** PUT
-  - **Response Status:** `200 OK`, `400 Bad Request`, `404 Not Found`
+  - **Headers:** `Authorization: Bearer <access_token>`, `Content-Type: application/json`
+  - **Response Status:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`
 
 - `DELETE /manufacturers/{id}/`
-  - **Опис:** Видалення виробника. Заборонено видаляти виробника, якщо за ним закріплені деталі.
+  - **Опис:** Видалення виробника (доступно лише для адміністраторів). Заборонено видаляти виробника, якщо за ним закріплені деталі.
   - **Request method:** DELETE
-  - **Response Status:** `204 No Content`, `404 Not Found`, `409 Conflict`
+  - **Headers:** `Authorization: Bearer <access_token>`
+  - **Response Status:** `204 No Content`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `409 Conflict`
   - **Response Body (при 409 Conflict):**
     ```json
     {

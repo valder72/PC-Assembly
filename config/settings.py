@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'catalog',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,9 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5500',
     'http://127.0.0.1:5500',
 ]
+
+REST_FRAMEWORK = {
+        'DEFAULT_AUTHENTICATION_CLASSES': [
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
+        ],
+}

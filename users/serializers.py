@@ -29,6 +29,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             'password_confirmation',
         ]
 
+    def validate_username(self, value):
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("A user with that username already exists.")
+        return value
+
     def validate_email(self, value):
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("Користувач із такою електронною поштою вже існує.")

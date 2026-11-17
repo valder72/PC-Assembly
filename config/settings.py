@@ -22,14 +22,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'default-insecure-key')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv('ALLOWED_HOSTS', '').split(',')
+    if host.strip()
+]
 
 # Application definition
 
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'corsheaders',
     'catalog',
     'users',
@@ -130,12 +132,53 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
+    origin.strip()
+    for origin in os.getenv(
+        'CORS_ALLOWED_ORIGINS',
+        'http://localhost:5500,http://127.0.0.1:5500',
+    ).split(',')
+    if origin.strip()
 ]
 
 REST_FRAMEWORK = {
-        'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-        ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'PC Assembly API',
+    'DESCRIPTION': 'API for managing PC parts, categories, manufacturers and users.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'catalog': {
+            'handlers': ['console'],
+            'level': os.getenv('LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'users': {
+            'handlers': ['console'],
+            'level': os.getenv('LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
+

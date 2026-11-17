@@ -47,6 +47,12 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 ```
+Основні змінні середовища:
+- `SECRET_KEY` — секретний ключ Django;
+- `DEBUG` — режим налагодження (`True` для локальної розробки, `False` для продакшену);
+- `ALLOWED_HOSTS` — список дозволених хостів через кому (наприклад, `localhost,127.0.0.1`);
+- `CORS_ALLOWED_ORIGINS` — дозволені origin-и для CORS через кому;
+- `LOG_LEVEL` — рівень логування (`DEBUG`, `INFO`, `WARNING`, `ERROR`).
 
 ### 5. Застосування міграцій бази даних
 ```bash
@@ -65,9 +71,31 @@ python manage.py runserver
 Сервер буде доступний за адресою: `http://127.0.0.1:8000/`.  
 Панель адміністратора: `http://127.0.0.1:8000/admin/`.
 
+### 8. Документація API (OpenAPI / Swagger / ReDoc)
+Документація генерується автоматично за допомогою `drf-spectacular`:
+- **Swagger UI:** `http://127.0.0.1:8000/api/docs/`
+- **ReDoc:** `http://127.0.0.1:8000/api/redoc/`
+- **OpenAPI-схема (YAML/JSON):** `http://127.0.0.1:8000/api/schema/`
+
+Щоб згенерувати файл OpenAPI-схеми локально через CLI:
+```bash
+python manage.py spectacular --file schema.yml
+```
+
 ---
 
-### 8. Тестування API (Postman Collection)
+### 9. Автоматизоване тестування (pytest + coverage)
+Запуск усіх тестів:
+```bash
+pytest
+```
+Запуск тестів із вимірюванням покриття коду за допомогою `coverage.py`:
+```bash
+coverage run --source=catalog,users,config -m pytest
+coverage report -m
+```
+
+### 10. Тестування API (Postman Collection)
 У проєкт додано готову Postman-колекцію v2.1: `postman/pc_assembly.postman_collection.json`.
 
 Запуск автоматичних тестів через Postman CLI:

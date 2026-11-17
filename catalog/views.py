@@ -3,6 +3,7 @@ import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from .models import Category, Manufacturer, Part
 from .serializers import CategorySerializer, ManufacturerSerializer, PartSerializer
 from .permissions import IsAdminOrReadOnly
@@ -146,6 +147,18 @@ class ManufacturerDetail(APIView):
 
 class PartList(APIView):
     permission_classes = [IsAdminOrReadOnly]
+
+    @extend_schema(
+        summary='List PC parts',
+        description='Returns a list of PC parts.',
+        auth=[],
+        parameters=[
+            OpenApiParameter(name='category', type=int, description='Filter by category ID'),
+            OpenApiParameter(name='manufacturer', type=int, description='Filter by manufacturer ID'),
+            OpenApiParameter(name='search', type=str, description='Search parts by title (case-insensitive)'),
+        ],
+        responses={200: PartSerializer(many=True)},
+    )
     def get(self, request):
         parts = Part.objects.all()
 
@@ -170,6 +183,32 @@ class PartList(APIView):
         serializer = PartSerializer(parts, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary='Create a PC part',
+        description='Creates a new PC part. Requires admin privileges.',
+        request=PartSerializer,
+        responses={
+            201: PartSerializer,
+            400: {'description': 'Invalid data'},
+            401: {'description': 'Authentication credentials were not provided'},
+            403: {'description': 'Admin privileges required'},
+        },
+        examples=[
+            OpenApiExample(
+                'Create CPU example',
+                value={
+                    'title': 'Ryzen 5 5600',
+                    'category': 1,
+                    'manufacturer': 1,
+                    'price': '5500.00',
+                    'rating': '4.80',
+                    'specs': {'cores': 6, 'threads': 12},
+                    'description': '6-core processor',
+                },
+                request_only=True,
+            ),
+        ],
+    )
     def post(self, request):
         serializer = PartSerializer(data=request.data)
         if serializer.is_valid():
@@ -197,6 +236,14 @@ class PartDetail(APIView):
         except Part.DoesNotExist:
             return None
 
+    @extend_schema(
+        summary='Retrieve a PC part',
+        auth=[],
+        responses={
+            200: PartSerializer,
+            404: {'description': 'Part not found'},
+        },
+    )
     def get(self, request, pk):
         part = self.get_object(pk)
         if part is None:
@@ -205,6 +252,18 @@ class PartDetail(APIView):
         serializer = PartSerializer(part)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary='Update a PC part',
+        description='Full update of a PC part. Requires admin privileges.',
+        request=PartSerializer,
+        responses={
+            200: PartSerializer,
+            400: {'description': 'Invalid data'},
+            401: {'description': 'Authentication credentials were not provided'},
+            403: {'description': 'Admin privileges required'},
+            404: {'description': 'Part not found'},
+        },
+    )
     def put(self, request, pk):
         part = self.get_object(pk)
         if part is None:
@@ -226,6 +285,18 @@ class PartDetail(APIView):
             serializer.errors,
         )
 
+    @extend_schema(
+        summary='Partially update a PC part',
+        description='Partial update of a PC part. Requires admin privileges.',
+        request=PartSerializer,
+        responses={
+            200: PartSerializer,
+            400: {'description': 'Invalid data'},
+            401: {'description': 'Authentication credentials were not provided'},
+            403: {'description': 'Admin privileges required'},
+            404: {'description': 'Part not found'},
+        },
+    )
     def patch(self, request, pk):
         part = self.get_object(pk)
         if part is None:
@@ -247,6 +318,16 @@ class PartDetail(APIView):
             serializer.errors,
         )
 
+    @extend_schema(
+        summary='Delete a PC part',
+        description='Deletes a PC part. Requires admin privileges.',
+        responses={
+            204: None,
+            401: {'description': 'Authentication credentials were not provided'},
+            403: {'description': 'Admin privileges required'},
+            404: {'description': 'Part not found'},
+        },
+    )
     def delete(self, request, pk):
         part = self.get_object(pk)
         if part is None:
